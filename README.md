@@ -1,64 +1,52 @@
-# a5-1
-<!DOCTYPE html>
+# <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>A5/1 Cipher Demo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>A5/1 Shifrlash / Deshifrlash</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f0f0f0;
-    }
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
     .container {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      max-width: 700px;
-      margin: auto;
+      background: white; border-radius: 10px; padding: 20px;
+      max-width: 800px; margin: auto;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     input, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
+      width: 100%; padding: 10px; margin-top: 10px;
+      border-radius: 6px; border: 1px solid #ccc; font-size: 16px;
     }
     button {
-      background: #0077cc;
-      color: white;
-      cursor: pointer;
+      background: #0077cc; color: white; cursor: pointer;
     }
-    button:hover {
-      background: #005fa3;
-    }
+    button:hover { background: #005fa3; }
     pre {
-      background: #f8f8f8;
-      padding: 10px;
-      border-radius: 6px;
-      overflow-x: auto;
+      background: #f8f8f8; padding: 10px;
+      border-radius: 6px; overflow-x: auto;
     }
+    label { font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>A5/1 Shifrlash Algoritmi (JavaScript)</h2>
-    <label>64-bit Kalit (masalan: 100100...):</label>
-    <input id="keyInput" maxlength="64" placeholder="64 ta bitdan iborat bo‘lsin">
 
-    <label>22-bit Frame Raqami (masalan: 0000000000000000000001):</label>
-    <input id="frameInput" maxlength="22" placeholder="22 ta bitdan iborat bo‘lsin">
+    <label>64-bit Kalit:</label>
+    <input id="keyInput" maxlength="64" placeholder="1001... (64 bit)" />
 
-    <label>Keystream uzunligi (masalan: 114):</label>
-    <input id="lengthInput" type="number" value="114">
+    <label>22-bit Frame Raqami:</label>
+    <input id="frameInput" maxlength="22" placeholder="0000000000000000000001" />
 
-    <button onclick="runA51()">Keystream hosil qilish</button>
+    <label>Matn (shifrlash uchun):</label>
+    <textarea id="plainText" rows="3" placeholder="Shifrlanadigan matn"></textarea>
+
+    <label>Shifrlangan Bitlar (deshifrlash uchun):</label>
+    <textarea id="cipherBits" rows="3" placeholder="0 va 1 lardan iborat satr"></textarea>
+
+    <button onclick="encryptText()">🛡 Shifrlash</button>
+    <button onclick="decryptText()">🔓 Deshifrlash</button>
 
     <h3>Natija:</h3>
-    <pre id="output">Natija shu yerda ko‘rsatiladi...</pre>
+    <pre id="output">Natija bu yerda paydo bo‘ladi...</pre>
   </div>
 
   <script>
@@ -98,11 +86,7 @@
 
         this.loadKey(key);
         this.loadFrame(frame);
-
-        // 100 marta majority clock bilan siljitish
-        for (let i = 0; i < 100; i++) {
-          this.majorityClock();
-        }
+        for (let i = 0; i < 100; i++) this.majorityClock();
       }
 
       majorityClock() {
@@ -146,29 +130,68 @@
           const bit = this.R1.getOutputBit() ^ this.R2.getOutputBit() ^ this.R3.getOutputBit();
           stream.push(bit);
         }
-        return stream.join('');
+        return stream;
       }
     }
 
-    function runA51() {
+    function textToBits(text) {
+      return text.split('').map(c => {
+        let bits = c.charCodeAt(0).toString(2);
+        return bits.padStart(8, '0');
+      }).join('');
+    }
+
+    function bitsToText(bits) {
+      let chars = [];
+      for (let i = 0; i < bits.length; i += 8) {
+        const byte = bits.slice(i, i + 8);
+        chars.push(String.fromCharCode(parseInt(byte, 2)));
+      }
+      return chars.join('');
+    }
+
+    function xorBits(bits1, bits2) {
+      return bits1.split('').map((b, i) => b ^ bits2[i]).join('');
+    }
+
+    function encryptText() {
       const key = document.getElementById("keyInput").value.trim();
       const frame = document.getElementById("frameInput").value.trim();
-      const len = parseInt(document.getElementById("lengthInput").value.trim());
+      const plain = document.getElementById("plainText").value;
 
       const output = document.getElementById("output");
 
-      if (key.length !== 64 || frame.length !== 22 || isNaN(len) || len <= 0) {
-        output.textContent = "⚠️ Iltimos, to‘g‘ri formatda ma’lumot kiriting!";
+      if (key.length !== 64 || frame.length !== 22 || plain.length === 0) {
+        output.textContent = "⚠️ Kirish ma’lumotlari to‘liq emas!";
         return;
       }
 
-      try {
-        const cipher = new A51(key, frame);
-        const keystream = cipher.getKeystream(len);
-        output.textContent = "🔑 Keystream:\n" + keystream;
-      } catch (e) {
-        output.textContent = "Xatolik: " + e.message;
+      const bits = textToBits(plain);
+      const cipher = new A51(key, frame);
+      const keystream = cipher.getKeystream(bits.length).join('');
+      const cipherBits = xorBits(bits, keystream);
+
+      output.textContent = "🔐 Shifrlangan bitlar:\n" + cipherBits;
+    }
+
+    function decryptText() {
+      const key = document.getElementById("keyInput").value.trim();
+      const frame = document.getElementById("frameInput").value.trim();
+      const cipherBits = document.getElementById("cipherBits").value.trim();
+
+      const output = document.getElementById("output");
+
+      if (key.length !== 64 || frame.length !== 22 || cipherBits.length === 0) {
+        output.textContent = "⚠️ Kirish ma’lumotlari to‘liq emas!";
+        return;
       }
+
+      const cipher = new A51(key, frame);
+      const keystream = cipher.getKeystream(cipherBits.length).join('');
+      const plainBits = xorBits(cipherBits, keystream);
+      const text = bitsToText(plainBits);
+
+      output.textContent = "🔓 Deshifrlangan matn:\n" + text;
     }
   </script>
 </body>
