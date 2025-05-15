@@ -231,16 +231,14 @@
 }
 function bitsToText(bits) {
   let chars = [];
-  for (let i = 0; i < bits.length; i += 8) {
+  for (let i = 0; i + 8 <= bits.length; i += 8) {
     const byte = bits.slice(i, i + 8);
-    chars.push(String.fromCharCode(parseInt(byte, 2)));
+    if (/^[01]{8}$/.test(byte)) {
+      chars.push(String.fromCharCode(parseInt(byte, 2)));
+    }
   }
   return chars.join('');
 }
-
-    function xorBits(bits1, bits2) {
-      return bits1.split('').map((b, i) => b ^ bits2[i]).join('');
-    }
 
 function encryptText() {
   const key = document.getElementById("keyInput1").value.trim();
