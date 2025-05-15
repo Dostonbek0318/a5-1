@@ -1,26 +1,27 @@
-<!DOCTYPE html>
+
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
-  <title>A5/1 Shifrlash Algoritmi</title>
+  <title>A5/1 Shifrlash va Deshifrlash</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      font-family: sans-serif;
-      background: #eef2f7;
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
       padding: 20px;
     }
     .container {
-      max-width: 800px;
+      max-width: 700px;
       margin: auto;
       background: white;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
       margin-bottom: 20px;
+      color: #333;
     }
     .tabs {
       display: flex;
@@ -29,125 +30,148 @@
     }
     .tab-btn {
       flex: 1;
-      padding: 10px;
-      background: #d9e2ec;
+      padding: 12px 0;
       border: none;
       cursor: pointer;
+      background: #cbd5e1;
+      color: #334155;
       font-size: 16px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
     }
     .tab-btn.active {
-      background: #0077cc;
+      background: #2563eb;
       color: white;
-    }
-    .section {
-      display: none;
-    }
-    .section.active {
-      display: block;
-    }
-    input, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    button {
-      background: #0077cc;
-      color: white;
-      margin-top: 15px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #005fa3;
-    }
-    pre {
-      background: #f9f9f9;
-      padding: 10px;
-      margin-top: 15px;
-      border-radius: 6px;
     }
     label {
-      font-weight: bold;
-      margin-top: 10px;
+      font-weight: 600;
+      margin-top: 15px;
       display: block;
+      color: #475569;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #94a3b8;
+      font-size: 16px;
+      resize: vertical;
+      font-family: monospace;
+    }
+    input[type="file"] {
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 18px;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background: #1e40af;
+    }
+    pre {
+      background: #e2e8f0;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 15px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: monospace;
+      min-height: 80px;
+      color: #1e293b;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>A5/1 Shifrlash / Deshifrlash</h2>
+    <h2>A5/1 Shifrlash va Deshifrlash</h2>
 
     <div class="tabs">
-      <button class="tab-btn active" onclick="showTab('encrypt')">🔐 Shifrlash</button>
-      <button class="tab-btn" onclick="showTab('decrypt')">🔓 Deshifrlash</button>
+      <button class="tab-btn active" onclick="switchTab('encrypt', this)">🔐 Shifrlash</button>
+      <button class="tab-btn" onclick="switchTab('decrypt', this)">🔓 Deshifrlash</button>
     </div>
 
-    <!-- SHIFRLASH -->
-    <div id="encrypt" class="section active">
-      <label>64-bit Kalit:</label>
-      <input id="keyInput1" maxlength="64" placeholder="Masalan: 1001..." />
+    <section id="encrypt" class="tab-content">
+      <label for="keyEncrypt">64-bit Kalit (0 va 1 dan iborat):</label>
+      <input id="keyEncrypt" type="text" maxlength="64" placeholder="Masalan: 010101...64 ta bit" />
 
-      <label>22-bit Frame:</label>
-      <input id="frameInput1" maxlength="22" placeholder="Masalan: 0000000000000000000001" />
+      <label for="frameEncrypt">22-bit Frame (0 va 1 dan iborat):</label>
+      <input id="frameEncrypt" type="text" maxlength="22" placeholder="Masalan: 0000000000000000000001" />
 
-      <label>Matn:</label>
-      <textarea id="plainText" rows="3" placeholder="Shifrlanadigan matn"></textarea>
-
-      <label>Yoki Word (.docx) fayl yuklang:</label>
+      <label for="plainText">Matn yoki Word (.docx) fayl yuklash orqali matn oling:</label>
+      <textarea id="plainText" rows="4" placeholder="Matn kiriting..."></textarea>
       <input type="file" id="wordFile" accept=".docx" onchange="loadWordFile()" />
 
-      <button onclick="encryptText()">🛡 Shifrlash</button>
+      <button onclick="encrypt()">Shifrlash</button>
 
-      <h3>Natija:</h3>
-      <pre id="outputEncrypt">Shifrlangan bitlar bu yerda chiqadi...</pre>
-    </div>
+      <label>Shifrlangan bitlar (0 va 1):</label>
+      <pre id="cipherOutput">Natija shu yerda chiqadi...</pre>
+    </section>
 
-    <!-- DESHIFRLASH -->
-    <div id="decrypt" class="section">
-      <label>64-bit Kalit:</label>
-      <input id="keyInput2" maxlength="64" placeholder="Masalan: 1001..." />
+    <section id="decrypt" class="tab-content" style="display:none;">
+      <label for="keyDecrypt">64-bit Kalit (0 va 1 dan iborat):</label>
+      <input id="keyDecrypt" type="text" maxlength="64" placeholder="Masalan: 010101...64 ta bit" />
 
-      <label>22-bit Frame:</label>
-      <input id="frameInput2" maxlength="22" placeholder="Masalan: 0000000000000000000001" />
+      <label for="frameDecrypt">22-bit Frame (0 va 1 dan iborat):</label>
+      <input id="frameDecrypt" type="text" maxlength="22" placeholder="Masalan: 0000000000000000000001" />
 
-      <label>Shifrlangan bitlar:</label>
-      <textarea id="cipherBits" rows="3" placeholder="0 va 1 lardan iborat"></textarea>
+      <label for="cipherText">Shifrlangan bitlar (0 va 1):</label>
+      <textarea id="cipherText" rows="4" placeholder="Shifrlangan bitlarni kiriting..."></textarea>
 
-      <button onclick="decryptText()">🔓 Deshifrlash</button>
+      <button onclick="decrypt()">Deshifrlash</button>
 
-      <h3>Natija:</h3>
-      <pre id="outputDecrypt">Deshifrlangan matn bu yerda chiqadi...</pre>
-    </div>
+      <label>Deshifrlangan matn:</label>
+      <pre id="plainOutput">Natija shu yerda chiqadi...</pre>
+    </section>
   </div>
 
-  <!-- Mammoth.js for DOCX reading -->
+  <!-- Mammoth.js (Word faylidan matn olish uchun) -->
   <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
 
   <script>
-    function showTab(tabId) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      event.target.classList.add('active');
+    // Tablarni almashtirish funksiyasi
+    function switchTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(section => {
+        section.style.display = 'none';
+      });
+      document.getElementById(id).style.display = 'block';
+
+      document.querySelectorAll('.tab-btn').forEach(button => {
+        button.classList.remove('active');
+      });
+      btn.classList.add('active');
     }
 
+    // DOCX fayldan matn olish
     function loadWordFile() {
-      const file = document.getElementById("wordFile").files[0];
+      const fileInput = document.getElementById('wordFile');
+      const file = fileInput.files[0];
       if (!file) return;
+
       const reader = new FileReader();
       reader.onload = function(event) {
         const arrayBuffer = event.target.result;
-        mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+        mammoth.extractRawText({arrayBuffer: arrayBuffer})
           .then(function(result) {
-            document.getElementById("plainText").value = result.value.trim();
+            document.getElementById('plainText').value = result.value.trim();
           })
-          .catch(err => alert("Xatolik: " + err));
+          .catch(function(err) {
+            alert('Word faylni o‘qishda xatolik: ' + err);
+          });
       };
       reader.readAsArrayBuffer(file);
     }
 
+    // A5/1 LFSR klassi
     class LFSR {
       constructor(size, taps, clockingBit) {
         this.size = size;
@@ -157,7 +181,7 @@
       }
 
       shift() {
-        let feedback = this.taps.reduce((acc, t) => acc ^ this.reg[t], 0);
+        const feedback = this.taps.reduce((acc, t) => acc ^ this.reg[t], 0);
         this.reg.pop();
         this.reg.unshift(feedback);
       }
@@ -167,7 +191,7 @@
       }
 
       getOutputBit() {
-        return this.reg[this.reg.length - 1];
+        return this.reg[this.size - 1];
       }
 
       xorBit(bit) {
@@ -176,18 +200,26 @@
       }
     }
 
+    // A5/1 algoritmi klassi
     class A51 {
       constructor(key, frame) {
         this.R1 = new LFSR(19, [13, 16, 17, 18], 8);
         this.R2 = new LFSR(22, [20, 21], 10);
         this.R3 = new LFSR(23, [7, 20, 21, 22], 10);
+
         this.loadKey(key);
         this.loadFrame(frame);
+
+        // 100 marta majburiy aylantirish
         for (let i = 0; i < 100; i++) this.majorityClock();
       }
 
       majorityClock() {
-        const m = this.majority(this.R1.getClockingBit(), this.R2.getClockingBit(), this.R3.getClockingBit());
+        const m = this.majority(
+          this.R1.getClockingBit(),
+          this.R2.getClockingBit(),
+          this.R3.getClockingBit()
+        );
         if (this.R1.getClockingBit() === m) this.R1.shift();
         if (this.R2.getClockingBit() === m) this.R2.shift();
         if (this.R3.getClockingBit() === m) this.R3.shift();
@@ -226,52 +258,77 @@
       }
     }
 
+    // Matnni bitlarga aylantirish (har belgi ASCII 8 bit)
     function textToBits(text) {
-      return text.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('');
-    }
-
-    function bitsToText(bits) {
-      let chars = [];
-      for (let i = 0; i < bits.length; i += 8) {
-        const byte = bits.slice(i, i + 8);
-        chars.push(String.fromCharCode(parseInt(byte, 2)));
+      let bits = "";
+      for (let i = 0; i < text.length; i++) {
+        bits += text.charCodeAt(i).toString(2).padStart(8, "0");
       }
-      return chars.join('');
+      return bits;
     }
 
+    // Bitlardan matnga aylantirish
+    function bitsToText(bits) {
+      let text = "";
+      for (let i = 0; i < bits.length; i += 8) {
+        let byte = bits.substr(i, 8);
+        if (byte.length < 8) break;
+        text += String.fromCharCode(parseInt(byte, 2));
+      }
+      return text;
+    }
+
+    // Ikki bit ketma-ketligini XOR qilish
     function xorBits(bits1, bits2) {
       return bits1.split('').map((b, i) => b ^ bits2[i]).join('');
     }
 
-    function encryptText() {
-      const key = document.getElementById("keyInput1").value.trim();
-      const frame = document.getElementById("frameInput1").value.trim();
-      const plain = document.getElementById("plainText").value;
+    // Shifrlash funksiyasi
+    function encrypt() {
+      const key = document.getElementById('keyEncrypt').value.trim();
+      const frame = document.getElementById('frameEncrypt').value.trim();
+      const plainText = document.getElementById('plainText').value;
 
-      const output = document.getElementById("outputEncrypt");
+      const output = document.getElementById('cipherOutput');
 
-      if (key.length !== 64 || frame.length !== 22 || plain.length === 0) {
-        output.textContent = "⚠️ Kirish ma’lumotlari to‘liq emas!";
+      if (key.length !== 64 || frame.length !== 22 || plainText.length === 0) {
+        output.textContent = "⚠️ Iltimos, 64 bit kalit, 22 bit frame va matn kiriting.";
         return;
       }
 
-      const bits = textToBits(plain);
+      if (!/^[01]+$/.test(key) || !/^[01]+$/.test(frame)) {
+        output.textContent = "⚠️ Kalit va frame faqat 0 va 1 dan iborat bo‘lishi kerak!";
+        return;
+      }
+
+      const plainBits = textToBits(plainText);
       const cipher = new A51(key, frame);
-      const keystream = cipher.getKeystream(bits.length).join('');
-      const cipherBits = xorBits(bits, keystream);
+      const keystream = cipher.getKeystream(plainBits.length).join('');
+      const cipherBits = xorBits(plainBits, keystream);
 
       output.textContent = cipherBits;
     }
 
-    function decryptText() {
-      const key = document.getElementById("keyInput2").value.trim();
-      const frame = document.getElementById("frameInput2").value.trim();
-      const cipherBits = document.getElementById("cipherBits").value.trim();
+    // Deshifrlash funksiyasi
+    function decrypt() {
+      const key = document.getElementById('keyDecrypt').value.trim();
+      const frame = document.getElementById('frameDecrypt').value.trim();
+      const cipherBits = document.getElementById('cipherText').value.trim();
 
-      const output = document.getElementById("outputDecrypt");
+      const output = document.getElementById('plainOutput');
 
       if (key.length !== 64 || frame.length !== 22 || cipherBits.length === 0) {
-        output.textContent = "⚠️ Kirish ma’lumotlari to‘liq emas!";
+        output.textContent = "⚠️ Iltimos, 64 bit kalit, 22 bit frame va shifrlangan bitlarni kiriting.";
+        return;
+      }
+
+      if (!/^[01]+$/.test(key) || !/^[01]+$/.test(frame)) {
+        output.textContent = "⚠️ Kalit va frame faqat 0 va 1 dan iborat bo‘lishi kerak!";
+        return;
+      }
+
+      if (!/^[01]+$/.test(cipherBits)) {
+        output.textContent = "⚠️ Shifrlangan bitlar faqat 0 va 1 dan iborat bo‘lishi kerak!";
         return;
       }
 
