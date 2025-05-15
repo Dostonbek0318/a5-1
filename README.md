@@ -1,4 +1,4 @@
-<!DOCTYPE html>ga
+<!DOCTYPE html>
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
@@ -67,6 +67,8 @@
       padding: 10px;
       margin-top: 15px;
       border-radius: 6px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
     label {
       font-weight: bold;
@@ -80,11 +82,10 @@
     <h2>A5/1 Shifrlash / Deshifrlash</h2>
 
     <div class="tabs">
-      <button class="tab-btn active" onclick="showTab('encrypt')">🔐 Shifrlash</button>
-      <button class="tab-btn" onclick="showTab('decrypt')">🔓 Deshifrlash</button>
+      <button class="tab-btn active" onclick="showTab(event, 'encrypt')">🔐 Shifrlash</button>
+      <button class="tab-btn" onclick="showTab(event, 'decrypt')">🔓 Deshifrlash</button>
     </div>
 
-    <!-- SHIFRLASH -->
     <div id="encrypt" class="section active">
       <label>64-bit Kalit:</label>
       <input id="keyInput1" maxlength="64" placeholder="Masalan: 1001..." />
@@ -104,7 +105,6 @@
       <pre id="outputEncrypt">Shifrlangan bitlar bu yerda chiqadi...</pre>
     </div>
 
-    <!-- DESHIFRLASH -->
     <div id="decrypt" class="section">
       <label>64-bit Kalit:</label>
       <input id="keyInput2" maxlength="64" placeholder="Masalan: 1001..." />
@@ -122,11 +122,9 @@
     </div>
   </div>
 
-  <!-- Mammoth.js for DOCX reading -->
   <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
-
   <script>
-    function showTab(tabId) {
+    function showTab(event, tabId) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
@@ -155,21 +153,17 @@
         this.clockingBit = clockingBit;
         this.reg = Array(size).fill(0);
       }
-
       shift() {
         let feedback = this.taps.reduce((acc, t) => acc ^ this.reg[t], 0);
         this.reg.pop();
         this.reg.unshift(feedback);
       }
-
       getClockingBit() {
         return this.reg[this.clockingBit];
       }
-
       getOutputBit() {
         return this.reg[this.reg.length - 1];
       }
-
       xorBit(bit) {
         this.reg[0] ^= bit;
         this.shift();
@@ -185,18 +179,15 @@
         this.loadFrame(frame);
         for (let i = 0; i < 100; i++) this.majorityClock();
       }
-
       majorityClock() {
         const m = this.majority(this.R1.getClockingBit(), this.R2.getClockingBit(), this.R3.getClockingBit());
         if (this.R1.getClockingBit() === m) this.R1.shift();
         if (this.R2.getClockingBit() === m) this.R2.shift();
         if (this.R3.getClockingBit() === m) this.R3.shift();
       }
-
       majority(a, b, c) {
         return (a + b + c) >= 2 ? 1 : 0;
       }
-
       loadKey(key) {
         for (let i = 0; i < 64; i++) {
           const bit = parseInt(key[i]);
@@ -205,7 +196,6 @@
           this.R3.xorBit(bit);
         }
       }
-
       loadFrame(frame) {
         for (let i = 0; i < 22; i++) {
           const bit = parseInt(frame[i]);
@@ -214,7 +204,6 @@
           this.R3.xorBit(bit);
         }
       }
-
       getKeystream(length) {
         const stream = [];
         for (let i = 0; i < length; i++) {
@@ -226,60 +215,62 @@
       }
     }
 
- function textToBits(text) {
-  return text.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('');
-}
-function bitsToText(bits) {
-  let chars = [];
-  for (let i = 0; i + 8 <= bits.length; i += 8) {
-    const byte = bits.slice(i, i + 8);
-    if (/^[01]{8}$/.test(byte)) {
-      chars.push(String.fromCharCode(parseInt(byte, 2)));
+    function textToBits(text) {
+      return text.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('');
     }
-  }
-  return chars.join('');
-}
 
-function encryptText() {
-  const key = document.getElementById("keyInput1").value.trim();
-  const frame = document.getElementById("frameInput1").value.trim();
-  const plain = document.getElementById("plainText").value;
+    function bitsToText(bits) {
+      let chars = [];
+      for (let i = 0; i + 8 <= bits.length; i += 8) {
+        const byte = bits.slice(i, i + 8);
+        if (/^[01]{8}$/.test(byte)) {
+          chars.push(String.fromCharCode(parseInt(byte, 2)));
+        }
+      }
+      return chars.join('');
+    }
 
-  const output = document.getElementById("outputEncrypt");
+    function xorBits(a, b) {
+      return a.split('').map((bit, i) => bit ^ b[i]).join('');
+    }
 
-  if (key.length !== 64 || frame.length !== 22 || plain.length === 0) {
-    output.textContent = "⚠️ Kirish ma’lumotlari to‘liq emas!";
-    return;
-  }
+    function encryptText() {
+      const key = document.getElementById("keyInput1").value.trim();
+      const frame = document.getElementById("frameInput1").value.trim();
+      const plain = document.getElementById("plainText").value;
+      const output = document.getElementById("outputEncrypt");
 
-  const bits = textToBits(plain);
-  const cipher = new A51(key, frame);
-  const keystream = cipher.getKeystream(bits.length).join('');
-  const cipherBits = xorBits(bits, keystream);
+      if (key.length !== 64 || frame.length !== 22 || plain.length === 0) {
+        output.textContent = "⚠️ Kirish ma’lumotlari to‘liq emas!";
+        return;
+      }
 
-  output.textContent = cipherBits;
-}
+      const bits = textToBits(plain);
+      const cipher = new A51(key, frame);
+      const keystream = cipher.getKeystream(bits.length).join('');
+      const cipherBits = xorBits(bits, keystream);
 
-function decryptText() {
-  const key = document.getElementById("keyInput2").value.trim();
-  const frame = document.getElementById("frameInput2").value.trim();
-  const cipherBits = document.getElementById("cipherBits").value.trim();
+      output.textContent = cipherBits;
+    }
 
-  const output = document.getElementById("outputDecrypt");
+    function decryptText() {
+      const key = document.getElementById("keyInput2").value.trim();
+      const frame = document.getElementById("frameInput2").value.trim();
+      const cipherBits = document.getElementById("cipherBits").value.trim();
+      const output = document.getElementById("outputDecrypt");
 
-  if (key.length !== 64 || frame.length !== 22 || cipherBits.length === 0) {
-    output.textContent = "⚠️ Kirish ma’lumotlari to‘liq emas!";
-    return;
-  }
+      if (key.length !== 64 || frame.length !== 22 || cipherBits.length === 0) {
+        output.textContent = "⚠️ Kirish ma’lumotlari to‘liq emas!";
+        return;
+      }
 
-  const cipher = new A51(key, frame);
-  const keystream = cipher.getKeystream(cipherBits.length).join('');
-  const plainBits = xorBits(cipherBits, keystream);
-  const text = bitsToText(plainBits);
+      const cipher = new A51(key, frame);
+      const keystream = cipher.getKeystream(cipherBits.length).join('');
+      const plainBits = xorBits(cipherBits, keystream);
+      const text = bitsToText(plainBits);
 
-  output.textContent = text;
-}
-
+      output.textContent = text;
+    }
   </script>
 </body>
 </html>
