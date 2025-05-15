@@ -1,4 +1,78 @@
-<!DOCTYPE html>ga
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A5/1 Shifrlash va Deshifrlash + Word</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #eef2f5; }
+    h1 { text-align: center; color: #333; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    textarea, input[type=text], input[type=file] {
+      width: 100%; padding: 10px; font-family: monospace;
+      font-size: 14px; border: 1px solid #ccc; border-radius: 6px; margin-top: 5px;
+    }
+    button {
+      margin-top: 15px; padding: 10px 20px;
+      font-size: 16px; cursor: pointer; background: #007bff;
+      color: white; border: none; border-radius: 6px;
+    }
+    button:hover { background: #0056b3; }
+    .output {
+      margin-top: 15px; white-space: pre-wrap;
+      background: #fff; padding: 10px;
+      border: 1px solid #ccc; border-radius: 6px;
+      min-height: 60px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>A5/1 Shifrlash va Deshifrlash</h1>
+
+<label for="wordFile">Word fayl yuklang (.docx):</label>
+<input type="file" id="wordFile" accept=".docx" />
+
+<label for="keyInput">64-bitli Kalit (0 va 1):</label>
+<input id="keyInput" type="text" maxlength="64" placeholder="64 bitli kalit" />
+
+<label for="frameInput">22-bitli Frame (0 va 1):</label>
+<input id="frameInput" type="text" maxlength="22" placeholder="22 bitli frame" />
+
+<label for="plainText">Matn (shifrlash uchun):</label>
+<textarea id="plainText" rows="4" placeholder="Shifrlash uchun matn yoki Worddan o‘qiladi"></textarea>
+
+<button id="btnEncrypt">Shifrlash</button>
+
+<label for="cipherText">Shifrlangan bitlar:</label>
+<textarea id="cipherText" rows="4" placeholder="Deshifrlash uchun bitlar"></textarea>
+
+<button id="btnDecrypt">Deshifrlash</button>
+
+<h3>Natija:</h3>
+<div id="output" class="output"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+<script>
+// A5/1, textToBits, bitsToText, xorBits funksiyalari shu yerga kiritiladi (oldingi javobdagi kabi)
+
+// Word fayldan matn olish
+const fileInput = document.getElementById("wordFile");
+fileInput.addEventListener("change", function () {
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    const arrayBuffer = event.target.result;
+    mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+      .then(result => {
+        document.getElementById("plainText").value = result.value.trim();
+      })
+      .catch(err => alert("❌ Word faylni o‘qishda xatolik!"));
+  };
+  reader.readAsArrayBuffer(fileInput.files[0]);
+});
+</script>
+<script>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8" />
@@ -209,6 +283,5 @@
     output.textContent = "Deshifrlangan matn:\n" + text;
   });
 </script>
-
 </body>
 </html>
