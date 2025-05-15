@@ -302,8 +302,7 @@
       }
 
       const plainBits = textToBits(plainText);
-      const cipher =
-new A51(key, frame);
+      const cipher =new A51(key, frame);
 const keystream = cipher.getKeystream(plainBits.length).join('');
 const cipherBits = xorBits(plainBits, keystream);
 
