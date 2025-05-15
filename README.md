@@ -1,5 +1,3 @@
-# Tayyor HTML faylini yaratib, unga yuqoridagi kodni yozaman.
-html_code = """
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -40,6 +38,7 @@ html_code = """
       font-size: 16px;
       font-weight: bold;
       transition: background-color 0.3s ease;
+      user-select: none;
     }
     .tab-btn.active {
       background: #2563eb;
@@ -98,8 +97,8 @@ html_code = """
     <h2>A5/1 Shifrlash va Deshifrlash</h2>
 
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('encrypt', this)">🔐 Shifrlash</button>
-      <button class="tab-btn" onclick="switchTab('decrypt', this)">🔓 Deshifrlash</button>
+      <button id="btnEncrypt" class="tab-btn active">🔐 Shifrlash</button>
+      <button id="btnDecrypt" class="tab-btn">🔓 Deshifrlash</button>
     </div>
 
     <section id="encrypt" class="tab-content">
@@ -111,9 +110,9 @@ html_code = """
 
       <label for="plainText">Matn yoki Word (.docx) fayl yuklash orqali matn oling:</label>
       <textarea id="plainText" rows="4" placeholder="Matn kiriting..."></textarea>
-      <input type="file" id="wordFile" accept=".docx" onchange="loadWordFile()" />
+      <input type="file" id="wordFile" accept=".docx" />
 
-      <button onclick="encrypt()">Shifrlash</button>
+      <button id="btnDoEncrypt">Shifrlash</button>
 
       <label>Shifrlangan bitlar (0 va 1):</label>
       <pre id="cipherOutput">Natija shu yerda chiqadi...</pre>
@@ -129,7 +128,7 @@ html_code = """
       <label for="cipherText">Shifrlangan bitlar (0 va 1):</label>
       <textarea id="cipherText" rows="4" placeholder="Shifrlangan bitlarni kiriting..."></textarea>
 
-      <button onclick="decrypt()">Deshifrlash</button>
+      <button id="btnDoDecrypt">Deshifrlash</button>
 
       <label>Deshifrlangan matn:</label>
       <pre id="plainOutput">Natija shu yerda chiqadi...</pre>
@@ -140,23 +139,32 @@ html_code = """
   <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
 
   <script>
-    // Tablarni almashtirish funksiyasi
-    function switchTab(id, btn) {
-      document.querySelectorAll('.tab-content').forEach(section => {
-        section.style.display = 'none';
-      });
-      document.getElementById(id).style.display = 'block';
+    // Tab tugmalarini olish
+    const btnEncrypt = document.getElementById('btnEncrypt');
+    const btnDecrypt = document.getElementById('btnDecrypt');
 
-      document.querySelectorAll('.tab-btn').forEach(button => {
-        button.classList.remove('active');
-      });
-      btn.classList.add('active');
-    }
+    // Tab kontentlarini olish
+    const sectionEncrypt = document.getElementById('encrypt');
+    const sectionDecrypt = document.getElementById('decrypt');
+
+    // Tugmalar bosilganda tabni almashtirish
+    btnEncrypt.addEventListener('click', () => {
+      sectionEncrypt.style.display = 'block';
+      sectionDecrypt.style.display = 'none';
+      btnEncrypt.classList.add('active');
+      btnDecrypt.classList.remove('active');
+    });
+
+    btnDecrypt.addEventListener('click', () => {
+      sectionEncrypt.style.display = 'none';
+      sectionDecrypt.style.display = 'block';
+      btnEncrypt.classList.remove('active');
+      btnDecrypt.classList.add('active');
+    });
 
     // DOCX fayldan matn olish
-    function loadWordFile() {
-      const fileInput = document.getElementById('wordFile');
-      const file = fileInput.files[0];
+    document.getElementById('wordFile').addEventListener('change', function() {
+      const file = this.files[0];
       if (!file) return;
 
       const reader = new FileReader();
@@ -171,9 +179,9 @@ html_code = """
           });
       };
       reader.readAsArrayBuffer(file);
-    }
+    });
 
-    // A5/1 LFSR klassi
+    // LFSR klassi
     class LFSR {
       constructor(size, taps, clockingBit) {
         this.size = size;
@@ -202,7 +210,7 @@ html_code = """
       }
     }
 
-    // A5/1 algoritmi klassi
+    // A5/1 algoritmi
     class A51 {
       constructor(key, frame) {
         this.R1 = new LFSR(19, [13, 16, 17, 18], 8);
@@ -212,7 +220,6 @@ html_code = """
         this.loadKey(key);
         this.loadFrame(frame);
 
-        // 100 marta majburiy aylantirish
         for (let i = 0; i < 100; i++) this.majorityClock();
       }
 
@@ -260,7 +267,7 @@ html_code = """
       }
     }
 
-    // Matnni bitlarga aylantirish (har belgi ASCII 8 bit)
+    // Matnni bitlarga aylantirish
     function textToBits(text) {
       let bits = "";
       for (let i = 0; i < text.length; i++) {
@@ -280,13 +287,13 @@ html_code = """
       return text;
     }
 
-    // Ikki bit ketma-ketligini XOR qilish
+    // XOR qilish
     function xorBits(bits1, bits2) {
       return bits1.split('').map((b, i) => b ^ bits2[i]).join('');
     }
 
-    // Shifrlash funksiyasi
-    function encrypt() {
+    // Shifrlash
+    document.getElementById('btnDoEncrypt').addEventListener('click', () => {
       const key = document.getElementById('keyEncrypt').value.trim();
       const frame = document.getElementById('frameEncrypt').value.trim();
       const plainText = document.getElementById('plainText').value;
@@ -303,4 +310,44 @@ html_code = """
         return;
       }
 
-      const plainBits = textTo
+      const plainBits = textToBits(plainText);
+      const cipher = new A51(key, frame);
+      const keystream = cipher.getKeystream(plainBits.length).join('');
+      const cipherBits = xorBits(plainBits, keystream);
+
+      output.textContent = cipherBits;
+    });
+
+    // Deshifrlash
+    document.getElementById('btnDoDecrypt').addEventListener('click', () => {
+      const key = document.getElementById('keyDecrypt').value.trim();
+      const frame = document.getElementById('frameDecrypt').value.trim();
+      const cipherBits = document.getElementById('cipherText').value.trim();
+
+      const output = document.getElementById('plainOutput');
+
+      if (key.length !== 64 || frame.length !== 22 || cipherBits.length === 0) {
+        output.textContent = "⚠️ Iltimos, 64 bit kalit, 22 bit frame va shifrlangan bitlarni kiriting.";
+        return;
+      }
+
+      if (!/^[01]+$/.test(key) || !/^[01]+$/.test(frame)) {
+        output.textContent = "⚠️ Kalit va frame faqat 0 va 1 dan iborat bo‘lishi kerak!";
+        return;
+      }
+
+      if (!/^[01]+$/.test(cipherBits)) {
+        output.textContent = "⚠️ Shifrlangan bitlar faqat 0 va 1 dan iborat bo‘lishi kerak!";
+        return;
+      }
+
+      const cipher = new A51(key, frame);
+      const keystream = cipher.getKeystream(cipherBits.length).join('');
+      const plainBits = xorBits(cipherBits, keystream);
+      const text = bitsToText(plainBits);
+
+      output.textContent = text;
+    });
+  </script>
+</body>
+</html>
