@@ -215,20 +215,23 @@
       }
     }
 
-    function textToBits(text) {
-      return text.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('');
-    }
+   function textToBits(text) {
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(text);
+  return Array.from(bytes).map(byte => byte.toString(2).padStart(8, '0')).join('');
+}
 
-    function bitsToText(bits) {
-      let chars = [];
-      for (let i = 0; i + 8 <= bits.length; i += 8) {
-        const byte = bits.slice(i, i + 8);
-        if (/^[01]{8}$/.test(byte)) {
-          chars.push(String.fromCharCode(parseInt(byte, 2)));
-        }
-      }
-      return chars.join('');
+function bitsToText(bits) {
+  const bytes = [];
+  for (let i = 0; i < bits.length; i += 8) {
+    const byte = bits.slice(i, i + 8);
+    if (byte.length === 8) {
+      bytes.push(parseInt(byte, 2));
     }
+  }
+  const decoder = new TextDecoder();
+  return decoder.decode(new Uint8Array(bytes));
+}
 
     function xorBits(a, b) {
       return a.split('').map((bit, i) => bit ^ b[i]).join('');
