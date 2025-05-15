@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>gada
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
@@ -226,26 +226,23 @@
       }
     }
 
-   function asciiTextToBits(asciiText) {
-  const codes = asciiText.trim().split(/\s+/).map(Number);
-  return codes.map(c => c.toString(2).padStart(8, '0')).join('');
+ function textToBits(text) {
+  return text.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('');
 }
-
-function bitsToAsciiText(bits) {
-  let codes = [];
+function bitsToText(bits) {
+  let chars = [];
   for (let i = 0; i < bits.length; i += 8) {
     const byte = bits.slice(i, i + 8);
-    codes.push(parseInt(byte, 2));
+    chars.push(String.fromCharCode(parseInt(byte, 2)));
   }
-  return codes.join(' ');
+  return chars.join('');
 }
-
 
     function xorBits(bits1, bits2) {
       return bits1.split('').map((b, i) => b ^ bits2[i]).join('');
     }
 
- function encryptText() {
+function encryptText() {
   const key = document.getElementById("keyInput1").value.trim();
   const frame = document.getElementById("frameInput1").value.trim();
   const plain = document.getElementById("plainText").value;
@@ -257,7 +254,7 @@ function bitsToAsciiText(bits) {
     return;
   }
 
-  const bits = asciiTextToBits(plain);
+  const bits = textToBits(plain);
   const cipher = new A51(key, frame);
   const keystream = cipher.getKeystream(bits.length).join('');
   const cipherBits = xorBits(bits, keystream);
@@ -265,8 +262,7 @@ function bitsToAsciiText(bits) {
   output.textContent = cipherBits;
 }
 
-
- function decryptText() {
+function decryptText() {
   const key = document.getElementById("keyInput2").value.trim();
   const frame = document.getElementById("frameInput2").value.trim();
   const cipherBits = document.getElementById("cipherBits").value.trim();
@@ -281,7 +277,7 @@ function bitsToAsciiText(bits) {
   const cipher = new A51(key, frame);
   const keystream = cipher.getKeystream(cipherBits.length).join('');
   const plainBits = xorBits(cipherBits, keystream);
-  const text = bitsToAsciiText(plainBits);
+  const text = bitsToText(plainBits);
 
   output.textContent = text;
 }
