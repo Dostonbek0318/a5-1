@@ -1,3 +1,5 @@
+# Tayyor HTML faylini yaratib, unga yuqoridagi kodni yozaman.
+html_code = """
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -301,45 +303,4 @@
         return;
       }
 
-      const plainBits = textToBits(plainText);
-      const cipher =new A51(key, frame);
-const keystream = cipher.getKeystream(plainBits.length).join('');
-const cipherBits = xorBits(plainBits, keystream);
-
-javascript
-Copy
-Edit
-  output.textContent = cipherBits;
-}
-
-// Deshifrlash funksiyasi
-function decrypt() {
-  const key = document.getElementById('keyDecrypt').value.trim();
-  const frame = document.getElementById('frameDecrypt').value.trim();
-  const cipherBits = document.getElementById('cipherText').value.trim();
-
-  const output = document.getElementById('plainOutput');
-
-  if (key.length !== 64 || frame.length !== 22 || cipherBits.length === 0) {
-    output.textContent = "⚠️ Iltimos, 64 bit kalit, 22 bit frame va shifrlangan bitlarni kiriting.";
-    return;
-  }
-
-  if (!/^[01]+$/.test(key) || !/^[01]+$/.test(frame)) {
-    output.textContent = "⚠️ Kalit va frame faqat 0 va 1 dan iborat bo‘lishi kerak!";
-    return;
-  }
-
-  if (!/^[01]+$/.test(cipherBits)) {
-    output.textContent = "⚠️ Shifrlangan bitlar faqat 0 va 1 dan iborat bo‘lishi kerak!";
-    return;
-  }
-
-  const cipher = new A51(key, frame);
-  const keystream = cipher.getKeystream(cipherBits.length).join('');
-  const plainBits = xorBits(cipherBits, keystream);
-  const text = bitsToText(plainBits);
-
-  output.textContent = text;
-}
-</script> </body> </html> ```
+      const plainBits = textTo
