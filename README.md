@@ -1,4 +1,4 @@
-<!DOCTYPE html>gada
+<!DOCTYPE html>ga
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
